@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-class StockRNN(nn.module):
+class StockRNN(nn.Module):
     #RNN Model definition using PyTorch
 
     def __init__(self, input_size, hidden_size, num_layers, output_size):
