@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np 
 import torch
 import torch.nn as nn
+import yfinance as yf
+import matplotlib.pyplot as plt
+import MinMaxScaler
 
 class StockRNN(nn.Module):
     #RNN Model definition using PyTorch
@@ -25,7 +28,6 @@ train_data = data[:int(len(data)*0.8)]
 test_data = data[int(len(data)*0.8):]
 
 # Normalize the test_data   
-from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler(feature_range=(-1, 1))
 train_data_normalized = scaler.fit_transform(train_data)
 test_data_normalized = scaler.fit_transform(test_data)
