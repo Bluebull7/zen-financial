@@ -1,30 +1,36 @@
 import requests
 import pandas as pd
+import yfinance as yf
+import processData
 
-class Data_Fetcher:
-    def __init__(self, api_key):
-        self.api_key = api_key
 
-    def fetch_data(self, symbol, function, outputsize):
-        base_url = "https://www.alphavantage.co/query"
-        datatype = "json"
+class DataFetcher:
 
+    def __init__(self):
+       self.process_yfinance_data = processData.ProcessData()
+
+    def fetch_news(self, symbol):
+        # Fetch news using the news API
+        url = 'https://newsapi.org/v2/everything'
         params = {
-            "function": function,
-            "symbol": symbol,
-            "apikey": self.api_key,
-            "datatype": datatype,
-            "outputsize": outputsize
-        }
+            'q': symbol,
+            }
 
-        response = requests.get(base_url, params=params)
+        response = requests.get(url, params=params)
         data = response.json()
+        articles = data['articles']
+        news = pd.DataFrame(articles)
+        return news
+        
+    def fetch_data(self, symbol, timeframe='daily', period='1y'):
+        ticker = yf.Ticker(symbol)
+        
+        # Fetch historical data using yfinance
+        data = ticker.history(period=period, interval=timeframe)
+        
+        # Convert to a format suitable for analysis
+        data = processData.ProcessData(data)
 
-        # Parse the result into a pandas DataFrame
-        df = pd.DataFrame(data['Time Series (Daily)']).T
-        df = df.apply(pd.to_numeric)
 
-        # Convert the index to datetime format
-        df.index = pd.to_datetime(df.index)
+        return data 
 
-        return df

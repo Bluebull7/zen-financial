@@ -20,24 +20,24 @@ class StockRNN(nn.Module):
         
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+        pass    
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
+    
+    def load_data(symbol):
+        # Fetch data using the Yahoo Finance API 
+        data = yf.download(symbol, start="2017-01-01", end="2021-01-01")
+        data = data.dropna()
+        data = data[['Close']]
 
-# Split the data into training and testing
-train_data = data[:int(len(data)*0.8)]
-test_data = data[int(len(data)*0.8):]
+        # Split the data into training and testing
+        train_data = data[:int(len(data)*0.8)]
+        test_data = data[int(len(data)*0.8):]
 
-# Normalize the test_data   
-scaler = MinMaxScaler(feature_range=(-1, 1))
-train_data_normalized = scaler.fit_transform(train_data)
-test_data_normalized = scaler.fit_transform(test_data)
-
-def load_data(symbol):
-    # Fetch data using the Yahoo Finance API 
-    data = yf.download(symbol, start="2017-01-01", end="2021-01-01")
-    data = data.dropna()
-    data = data[['Close']]
-    return data
+        # Normalize the test_data   
+        scaler = MinMaxScaler(feature_range=(-1, 1))
+        train_data_normalized = scaler.fit_transform(train_data)
+        test_data_normalized = scaler.fit_transform(test_data)
+        return data
 
 def train_model(train_data, input_size, hidden_size, num_layers, output_size, num_epochs):
     # Train the model using the training data
@@ -65,6 +65,8 @@ def test_model(model, test_data):
     test_data_normalized = test_data_normalized.view(1, -1)
     outputs = model(test_data_normalized)
     return outputs
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
 
 def main():
     symbol = 'AAPL'

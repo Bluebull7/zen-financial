@@ -1,36 +1,70 @@
+import django
+
 from django.test import TestCase
 
 # Create your tests here.
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import pandas as pd
-from data_fetcher import Data_Fetcher
+from data_fetcher import DataFetcher
+
 
 class TestDataFetcher(unittest.TestCase):
-    @patch('requests.get')
-    def test_fetch_data(self, mock_get):
-        # Mock the JSON response from Alpha Vantage
-        mock_response = {
-            'Time Series (Daily)': {
-                '2022-01-01': {'1. open': '100.0', '2. high': '101.0', '3. low': '99.0', '4. close': '100.5', '5. volume': '1000000'},
-                '2022-01-02': {'1. open': '101.0', '2. high': '102.0', '3. low': '100.0', '4. close': '101.5', '5. volume': '1000000'}
+    @patch("yfinance.Ticker")
+    def test_fetch_data(self, mock_ticker):
+        # Mock the yfinance Ticker and its history method
+        mock_data = pd.DataFrame(
+            {
+                "Open": [1, 2, 3],
+                "High": [1, 2, 3],
+                "Low": [1, 2, 3],
+                "Close": [1, 2, 3],
+                "Volume": [1, 2, 3],
             }
-        }
-        mock_get.return_value.json.return_value = mock_response
-        
-    
-        fetcher = Data_Fetcher('dummy_api_key')
-        df = fetcher.fetch_data('MSFT', 'TIME_SERIES_DAILY', 'compact')
-        
-        # change the columns to datetime format
-        df.columns = pd.to_datetime(df.columns)
-        
-        # Check that the DataFrame has the corrcect shape
-        self.assertEqual(df.shape, (2, 5))
+        )
+        mock_ticker.return_value.history.return_value = mock_data
 
-        # Check that the DataFrame has the correct column names
-        expected_columns = pd.to_datetime(['2022-01-01', '2022-01-02'])
-        pd.testing.assert_index_equal(df.columns, expected_columns)
+        # Initialize DataFetcher and call fetch_data
+        fetcher = DataFetcher()
+        result = fetcher.fetch_data("AAPL")
 
-if __name__ == '__main__':
+        # Assert that the Ticker was called with the correct symbol
+        mock_ticker.assert_called_once_with("AAPL")
+
+        # Assert that the history method was called with the correct parameters
+        mock_ticker.return_value.history.assert_called_once_with(
+            period="1y", interval="daily"
+        )
+
+        # Assert that the result is as expected
+        expected_result = [
+            {
+                "date": pd.Timestamp("1970-01-01 00:00:00"),
+                "open": 1,
+                "high": 1,
+                "low": 1,
+                "close": 1,
+                "volume": 1,
+            },
+            {
+                "date": pd.Timestamp("1970-01-01 00:00:00"),
+                "open": 2,
+                "high": 2,
+                "low": 2,
+                "close": 2,
+                "volume": 2,
+            },
+            {
+                "date": pd.Timestamp("1970-01-01 00:00:00"),
+                "open": 3,
+                "high": 3,
+                "low": 3,
+                "close": 3,
+                "volume": 3,
+            },
+        ]
+        self.assertEqual(result, expected_result)
+
+
+if __name__ == "__main__":
     unittest.main()
