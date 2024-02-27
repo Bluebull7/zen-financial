@@ -29,7 +29,7 @@ class DataFetcher:
         data = ticker.history(period=period, interval=timeframe)
         
         # Convert to a format suitable for analysis
-        data = processData.ProcessData(data)
+        data = processData(data)
 
 
         return data 
