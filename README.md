@@ -16,7 +16,7 @@ Getting Started
 Clone the Repository:
 
 Bash
-git clone https://github.com/[your-username]/ZenFinancials.git
+git clone https://github.com/Bluebull7/ZenFinancials.git
 Use code with caution.
 Install Dependencies:
 
